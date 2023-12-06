@@ -1,9 +1,12 @@
+import functools
+import itertools
 import re
 import sys
 from dataclasses import dataclass
-from typing import Generator
+from typing import Generator, Iterable, TypeVar
 
 YieldStr = Generator[str, None, None]
+T = TypeVar("T")
 
 TEST_INPUT = """\
 seeds: 79 14 55 13
@@ -46,15 +49,14 @@ humidity-to-location map:
 class RangeMapper:
     dest_start: int
     source_start: int
-    range_lenght: int
+    lenght: int
 
     def map(self, value: int) -> int:
-        diff = self.dest_start - self.source_start
-        return value + diff
+        offset = self.dest_start - self.source_start
+        return value + offset
 
     def __contains__(self, item: int) -> bool:
-        stop = self.source_start + self.range_lenght
-        return item in range(self.source_start, stop)
+        return item in range_by_length(self.source_start, self.lenght)
 
 
 @dataclass
@@ -108,6 +110,22 @@ def read_lines_from_file(path):
             yield line
 
 
+# Taken from https://docs.python.org/3.12/library/itertools.html?highlight=itertools#itertools.batched
+def batched(iterable: Iterable[T], n: int):
+    # batched('ABCDEFG', 3) --> ABC DEF G
+    if n < 1:
+        raise ValueError("n must be at least one")
+    it = iter(iterable)
+    while batch := tuple(itertools.islice(it, n)):
+        yield batch
+
+
+@functools.cache
+def range_by_length(start: int, lenght: int, step: int = 1) -> range:
+    """range_by_length(2, 5) --> 2 3 4 5 6"""
+    return range(start, start + lenght, step)
+
+
 def part_1(input: YieldStr, testing: bool):
     TEST_OUTPUT = 35
 
@@ -124,13 +142,29 @@ def part_1(input: YieldStr, testing: bool):
         assert output == TEST_OUTPUT
 
 
+# Really slow, better run it with pypy
 def part_2(input: YieldStr, testing: bool):
-    TEST_OUTPUT = 0
+    TEST_OUTPUT = 46
 
-    output = 0
+    parsed_input = MappersParser(input)
+    mappers = parsed_input.mappers
+    seeds = (
+        range_by_length(start, length)
+        for start, length in batched(parsed_input.seeds, 2)
+    )
+
+    lowest_location = sys.maxsize
+
+    for seed in itertools.chain.from_iterable(seeds):
+        mapped_seed = seed
+        for mapper in mappers:
+            mapped_seed = mapper.map(mapped_seed)
+        lowest_location = min(mapped_seed, lowest_location)
+
+    print(lowest_location)
 
     if testing:
-        assert output == TEST_OUTPUT
+        assert lowest_location == TEST_OUTPUT
 
 
 def main():
@@ -140,7 +174,7 @@ def main():
         testing = True
     else:
         input = read_lines_from_file(sys.argv[1])
-    part_1(input, testing)
+    part_2(input, testing)
 
 
 if __name__ == "__main__":
