@@ -4,7 +4,7 @@ from typing import Iterator
 YieldStr = Iterator[str]
 
 
-def read_lines_from_file(path):
+def read_lines_from_file(path) -> YieldStr:
     with open(path, "r", encoding="utf-8") as file:
         for line in file:
             yield line
