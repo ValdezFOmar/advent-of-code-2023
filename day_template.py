@@ -1,7 +1,7 @@
 import sys
-from typing import Generator
+from typing import Iterator
 
-YieldStr = Generator[str, None, None]
+YieldStr = Iterator[str]
 
 
 def read_lines_from_file(path):

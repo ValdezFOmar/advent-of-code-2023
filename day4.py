@@ -1,6 +1,7 @@
 import re
 import sys
 from dataclasses import dataclass
+from itertools import islice
 from typing import Generator
 
 YieldStr = Generator[str, None, None]
@@ -10,12 +11,17 @@ YieldStr = Generator[str, None, None]
 class Card:
     winning_numbers: frozenset[int]
     card_numbers: frozenset[int]
+    copies: int = 1
+
+    @property
+    def matching_nums(self) -> int:
+        return len(self.winning_numbers & self.card_numbers)
 
     @property
     def points(self) -> int:
-        win_nums_that_appear = len(self.winning_numbers & self.card_numbers)
-        multiplier = win_nums_that_appear - 1
-        return 2 ** (multiplier) if win_nums_that_appear != 0 else 0
+        matching_nums = self.matching_nums
+        multiplier = matching_nums - 1
+        return 2 ** (multiplier) if matching_nums != 0 else 0
 
     @classmethod
     def from_line(cls, line: str):
@@ -57,8 +63,22 @@ def part_1(input: YieldStr, testing: bool):
         assert card_points == TEST_OUTPUT
 
 
-def part_2(input: YieldStr):
-    pass
+def part_2(input: YieldStr, testing: bool):
+    TEST_OUTPUT = 30
+
+    cards = [Card.from_line(line) for line in input]
+
+    for i, card in enumerate(cards):
+        next_card = i + 1
+        until_card = i + card.matching_nums + 1
+        for winned_card in islice(cards, next_card, until_card):
+            winned_card.copies += card.copies
+
+    cards_copies = sum(card.copies for card in cards)
+    print(cards_copies)
+
+    if testing:
+        assert cards_copies == TEST_OUTPUT
 
 
 def main():
@@ -68,7 +88,8 @@ def main():
         testing = True
     else:
         input = read_lines_from_file(sys.argv[1])
-    part_1(input, testing)
+    # part_1(input, testing)
+    part_2(input, testing)
 
 
 if __name__ == "__main__":
