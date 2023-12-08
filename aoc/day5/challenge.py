@@ -143,6 +143,8 @@ def part_1(input: YieldStr, testing: bool):
 
 
 # Really slow, better run it with pypy
+# Get minimun value
+# functools.reduce(min, [1,2,3])
 def part_2(input: YieldStr, testing: bool):
     TEST_OUTPUT = 46
 

@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "aoc"
+version = "0.1.0"
+description = "Solved challenges from AoC 2023"
+authors = ["Omar Valdez <80359343+ValdezFOmar@users.noreply.github.com>"]
+license = "GPL-3.0-only"
+readme = "README.md"
+repository = "https://github.com/ValdezFOmar/advent-of-code-2023"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+regex = "^2023.10.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
