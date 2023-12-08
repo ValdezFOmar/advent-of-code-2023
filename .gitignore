@@ -1,4 +1,7 @@
 input*.txt
+test-input*.txt
+
+!aoc/tools/_day_template/*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
