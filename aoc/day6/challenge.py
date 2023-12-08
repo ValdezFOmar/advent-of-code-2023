@@ -41,7 +41,7 @@ class Race:
         return remaining_time * seconds
 
 
-def ilen(iterable: Iterator) -> int:
+def ilen(iterable: Iterator[object]) -> int:
     """Return the iterator length."""
     return functools.reduce(lambda sum, _: sum + 1, iterable, 0)
 
