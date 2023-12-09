@@ -31,17 +31,17 @@ class HandType(IntEnum):
 
         if num_unique_cards == 1:
             return cls.FIVE_OF_A_KIND
-        elif num_unique_cards == 2:
+        if num_unique_cards == 2:
             counts = {cards.count(card) for card in unique_cards}
             if 4 in counts:
                 return cls.FOUR_OF_A_KIND
             return cls.FULL_HOUSE
-        elif num_unique_cards == 3:
+        if num_unique_cards == 3:
             counts = {cards.count(card) for card in unique_cards}
             if 3 in counts:
                 return cls.THREE_OF_A_KIND
             return cls.TWO_PAIR
-        elif num_unique_cards == 4:
+        if num_unique_cards == 4:
             return cls.ONE_PAIR
         return cls.HIGH_CARD
 

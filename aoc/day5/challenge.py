@@ -110,7 +110,7 @@ def read_lines_from_file(path):
             yield line
 
 
-# Taken from https://docs.python.org/3.12/library/itertools.html?highlight=itertools#itertools.batched
+# Taken from https://docs.python.org/3.12/library/itertools.html#itertools.batched
 def batched(iterable: Iterable[T], n: int):
     # batched('ABCDEFG', 3) --> ABC DEF G
     if n < 1:

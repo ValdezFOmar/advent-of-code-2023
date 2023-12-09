@@ -17,25 +17,22 @@ def read_lines_from_file(path: StrPath) -> Iterator[str]:
             yield line
 
 
+def relative_test_file(relative_to: StrPath, name: str | None = None) -> Iterator[str]:
+    """Automatically creates a generator for test-input.txt file."""
+    if name is None:
+        name = "test-input.txt"
+    path = Path(relative_to)
+    path = path.parent / name if not path.is_dir() else path / name
+    return read_lines_from_file(path)
+
+
 def run_challenge(
     solution: Callable[[Iterator[str]], object],
-    input_challenge: Iterator[str] | None = None,
-    /,
-    relative_to: StrPath | None = None,
+    relative_to: StrPath,
+    *,
     debug: bool = False,
 ) -> None:
     """Runs the challenge solution with the given input and prints its output."""
-    if input_challenge is not None:
-        output = solution(input_challenge)
-    elif relative_to is not None:
-        defualt_input = "input.txt" if not debug else "test-input.txt"
-        path = Path(relative_to)
-        path = (
-            path.parent / defualt_input if not path.is_dir() else path / defualt_input
-        )
-        input = read_lines_from_file(path)
-        output = solution(input)
-    else:
-        raise TypeError(f"You must provide either 'input_challenge' or 'relative_to'")
-
+    name = None if debug else "input.txt"
+    output = solution(relative_test_file(relative_to, name))
     print(f"{solution.__name__}: {output}")
