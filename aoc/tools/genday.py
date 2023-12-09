@@ -32,7 +32,7 @@ def main() -> int | str:
         return error_msg("The subpackage for this day already exits.")
 
     dest_copied = shutil.copytree(src=template_dir, dst=dest_path)
-    print("Subpacke create at:", dest_copied)
+    print("Subpackage create at:", dest_copied)
 
     return 0
 
