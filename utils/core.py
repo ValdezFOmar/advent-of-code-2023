@@ -65,7 +65,7 @@ def adjacent_cells(
             yield Cell(cell_value, current_row, current_column)
 
 
-def adjacent_cells_to_line(  # pylint: disable=too-many-locals
+def adjacent_cells_to_line(
     matrix: Matrix2D[T],
     pos_row: int,
     pos_column_start: int,

@@ -1,5 +1,6 @@
 input*.txt
 test-input*.txt
+output.txt
 
 !aoc/tools/_day_template/*.txt
 

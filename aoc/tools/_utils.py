@@ -35,4 +35,4 @@ def run_challenge(
     """Runs the challenge solution with the given input and prints its output."""
     name = None if debug else "input.txt"
     output = solution(relative_test_file(relative_to, name))
-    print(f"{solution.__name__}: {output}")
+    print(f"{solution.__name__}: {output:<20,}{output}")
