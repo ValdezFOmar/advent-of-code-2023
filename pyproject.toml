@@ -6,6 +6,10 @@ authors = ["Omar Valdez <80359343+ValdezFOmar@users.noreply.github.com>"]
 license = "GPL-3.0-only"
 readme = "README.md"
 repository = "https://github.com/ValdezFOmar/advent-of-code-2023"
+packages = [
+    { include = "aoc" },
+    { include = "utils" }
+]
 
 [tool.poetry.scripts]
 genday = "aoc.tools.genday:main"
@@ -13,10 +17,10 @@ genday = "aoc.tools.genday:main"
 [tool.poetry.dependencies]
 python = "^3.11"
 regex = "^2023.10.3"
-pylint = "^3.0.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
+pylint = "^3.0.2"
 
 [build-system]
 requires = ["poetry-core"]
@@ -32,7 +36,7 @@ disable = [
     "missing-module-docstring",
     "missing-function-docstring",
     "missing-class-docstring",
-    "redefined-builtin"
+    "redefined-builtin",
 ]
 good-names = ["TEST_OUTPUT"]
 ignore-paths = [
