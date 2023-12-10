@@ -9,7 +9,7 @@ from .challenge import solution_part_1, solution_part_2
     "solution, output",
     [
         (solution_part_1, 114),
-        (solution_part_2, 0),
+        (solution_part_2, 2),
     ],
 )
 def test_solution(solution, output):

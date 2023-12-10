@@ -2,6 +2,7 @@ import pytest
 
 from .core import (adjacent_cells_to_cell, adjacent_cells_to_line,
                    calc_position_deviation)
+from .iterutils import predict_prev_number
 
 # fmt: off
 MATRIX = [
@@ -44,3 +45,12 @@ def test_adjacent_to_line(matrix, pos, cells):
 ])
 def test_deviation(position, deviation):
     assert calc_position_deviation(*position) == deviation
+
+
+@pytest.mark.parametrize("seq, prev_num", [
+    ((0, 3, 6, 9, 12, 15,),   -3),
+    ((1, 3, 6, 10, 15, 21,),   0),
+    ((10, 13, 16, 21, 30, 45,),5),
+])
+def test_prev_number(seq, prev_num):
+    assert predict_prev_number(seq) == prev_num
