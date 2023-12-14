@@ -1,5 +1,6 @@
 import re
 from dataclasses import InitVar, dataclass, field
+from itertools import chain
 from typing import Iterable, Iterator
 
 import utils.iterutils as itu
@@ -25,7 +26,12 @@ class MappingRange:
         return self.dest[i]
 
     def map_range(self, _range: range) -> range:
-        return range(self.map(_range.start), self.map(_range.stop))
+        if _range == self.source:
+            return self.dest
+        upper_bound = (
+            self.dest.stop if _range.stop == self.source.stop else self.map(_range.stop)
+        )
+        return range(self.map(_range.start), upper_bound)
 
 
 @dataclass(slots=True)
@@ -52,23 +58,31 @@ class CategoryMapper:
     def imap_range(self, r: range) -> Iterator[range]:
         # This method relias in mapping_ranges being sorted
         last_upper_bound = self.mapping_ranges[-1].source.stop
+        original_r = r
+        last_yielded = r
         for mrange in self.mapping_ranges:
             if r.stop <= mrange.source.start or r.start >= last_upper_bound:
-                yield r
+                yield (last_yielded := r)
                 break
             if r.start >= mrange.source.start and r.stop <= mrange.source.stop:
-                yield mrange.map_range(r)
+                if r:
+                    yield (last_yielded := mrange.map_range(r))
                 break
             lower_bound = itu.get_index(r, mrange.source.start)
             upper_bound = itu.get_index(r, mrange.source.stop)
             if lower_bound is not None:
-                yield r[:lower_bound]
+                yield (last_yielded := r[:lower_bound])
             if None not in (lower_bound, upper_bound):
                 contained_range = r[lower_bound:upper_bound]
-                yield mrange.map_range(contained_range)
-            if upper_bound is None:
-                break
+                yield (last_yielded := mrange.map_range(contained_range))
+            if upper_bound is not None and lower_bound is None:
+                yield (last_yielded := r[:upper_bound])
             r = r[upper_bound:]
+        if last_yielded != r and r != original_r:
+            yield r
+
+    def map_range(self, r: range) -> tuple[range, ...]:
+        return tuple(self.imap_range(r))
 
 
 def parse_input(input: YieldStr) -> tuple[list[int], Iterator[CategoryMapper]]:
@@ -105,18 +119,20 @@ def parse_input(input: YieldStr) -> tuple[list[int], Iterator[CategoryMapper]]:
 
 def solution_part_1(input: YieldStr) -> int:
     seeds, categories = parse_input(input)
-    print(seeds)
     for categorie in categories:
-        seeds = [categorie.map(seed) for seed in seeds]
-        print(categorie.name)
-        print(seeds)
+        seeds = map(categorie.map, seeds)
     return min(seeds)
 
 
 def solution_part_2(input: YieldStr) -> int:
-    # seeds_ranges = [itu.length_range(*seed_range) for seed_range in seeds]
-    return 0
+    seeds, categories = parse_input(input)
+    seeds_ranges = [itu.length_range(*seed_pair) for seed_pair in itu.batched(seeds, 2)]
+
+    for category in categories:
+        mapped_ranges = [category.map_range(seed_range) for seed_range in seeds_ranges]
+        seeds_ranges = chain.from_iterable(mapped_ranges)
+    return min(sr.start for sr in seeds_ranges)
 
 
 if __name__ == "__main__":
-    run_challenge(solution_part_1, __file__, debug=True)
+    run_challenge(solution_part_2, __file__, debug=True)
