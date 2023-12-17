@@ -1,10 +1,16 @@
 import re
 from dataclasses import InitVar, dataclass, field
 from itertools import chain
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, NamedTuple, TypeAlias
 
 import utils.iterutils as itu
 from aoc.tools import YieldStr, run_challenge
+
+
+class RangeIntersections(NamedTuple):
+    left: range | None
+    middle: range | None
+    right: range | None
 
 
 @dataclass(slots=True)
@@ -28,13 +34,60 @@ class MappingRange:
     def map_range(self, _range: range) -> range:
         if _range == self.source:
             return self.dest
-        upper_bound = (
-            self.dest.stop if _range.stop == self.source.stop else self.map(_range.stop)
+        lower_bound = (
+            self.map(_range.start)
+            if _range.start != self.source.start
+            else self.dest.start
         )
-        return range(self.map(_range.start), upper_bound)
+        upper_bound = (
+            self.map(_range.stop) if _range.stop != self.source.stop else self.dest.stop
+        )
+        return range(lower_bound, upper_bound)
+
+    def is_before(self, r: range) -> bool:
+        return self.source.stop <= r.start
+
+    def is_after(self, r: range) -> bool:
+        return r.stop <= self.source.start
+
+    def divide_by_intersections(self, r: range) -> RangeIntersections:
+        if r in self:
+            return RangeIntersections(None, r, None)
+
+        lower_i = itu.get_index(r, self.source.start)
+        upper_i = itu.get_index(r, self.source.stop)
+
+        left = r[:lower_i] if lower_i not in {None, 0} else None
+        right = r[upper_i:] if upper_i not in {None, 0} else None
+
+        if left and right:
+            middle = r[lower_i:upper_i]
+        elif left and not right:
+            middle = r[lower_i:]
+        elif right and not left:
+            middle = r[:upper_i]
+        else:
+            middle = None
+        return RangeIntersections(left, middle, right)
+
+    def __contains__(self, value) -> bool:
+        if not isinstance(value, range):
+            return False
+        return value.start >= self.source.start and value.stop <= self.source.stop
+
+    def __lt__(self, other) -> bool:
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return (
+            self.source.start,
+            self.source.stop,
+        ) < (
+            other.source.start,
+            other.source.stop,
+        )
 
 
-@dataclass(slots=True)
+@dataclass
 class CategoryMapper:
     name: str
     iterable: InitVar[Iterable[MappingRange]]
@@ -43,11 +96,7 @@ class CategoryMapper:
     def __post_init__(self, iterable: Iterable[MappingRange]) -> None:
         if not iterable:
             raise ValueError("parameter 'iterable' can't be empty")
-        self.mapping_ranges = tuple(sorted(iterable, key=self._sort_range_key))
-
-    @staticmethod
-    def _sort_range_key(mr: MappingRange):
-        return mr.source.start, mr.source.stop
+        self.mapping_ranges = tuple(sorted(iterable))
 
     def map(self, val: int) -> int:
         for mrange in self.mapping_ranges:
@@ -57,28 +106,31 @@ class CategoryMapper:
 
     def imap_range(self, r: range) -> Iterator[range]:
         # This method relias in mapping_ranges being sorted
-        last_upper_bound = self.mapping_ranges[-1].source.stop
-        original_r = r
-        last_yielded = r
+        first_range = self.mapping_ranges[0]
+        last_range = self.mapping_ranges[-1]
+
+        if first_range.is_after(r) or last_range.is_before(r):
+            yield r
+            return
         for mrange in self.mapping_ranges:
-            if r.stop <= mrange.source.start or r.start >= last_upper_bound:
-                yield (last_yielded := r)
+            if mrange.is_before(r):
+                continue
+            if r in mrange:
+                yield mrange.map_range(r)
+                return
+            if mrange.is_after(r):
+                yield r
+                return
+            intersections = mrange.divide_by_intersections(r)
+            if intersections.left is not None:
+                yield intersections.left
+            if intersections.middle is not None:
+                yield mrange.map_range(intersections.middle)
+            if intersections.right is None:
                 break
-            if r.start >= mrange.source.start and r.stop <= mrange.source.stop:
-                if r:
-                    yield (last_yielded := mrange.map_range(r))
-                break
-            lower_bound = itu.get_index(r, mrange.source.start)
-            upper_bound = itu.get_index(r, mrange.source.stop)
-            if lower_bound is not None:
-                yield (last_yielded := r[:lower_bound])
-            if None not in (lower_bound, upper_bound):
-                contained_range = r[lower_bound:upper_bound]
-                yield (last_yielded := mrange.map_range(contained_range))
-            if upper_bound is not None and lower_bound is None:
-                yield (last_yielded := r[:upper_bound])
-            r = r[upper_bound:]
-        if last_yielded != r and r != original_r:
+            r = intersections.right
+        # if a right intersection happens at the last range, it might not be yield
+        if r is not None and last_range.is_before(r):
             yield r
 
     def map_range(self, r: range) -> tuple[range, ...]:
@@ -128,9 +180,10 @@ def solution_part_2(input: YieldStr) -> int:
     seeds, categories = parse_input(input)
     seeds_ranges = [itu.length_range(*seed_pair) for seed_pair in itu.batched(seeds, 2)]
 
-    for category in categories:
-        mapped_ranges = [category.map_range(seed_range) for seed_range in seeds_ranges]
-        seeds_ranges = chain.from_iterable(mapped_ranges)
+    for categorie in categories:
+        mapped_seeds = [categorie.map_range(sr) for sr in seeds_ranges]
+        seeds_ranges = chain.from_iterable(mapped_seeds)
+
     return min(sr.start for sr in seeds_ranges)
 
 
