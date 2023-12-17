@@ -26,7 +26,7 @@ def main() -> int | str:
     if not (template_dir.exists() and template_dir.is_dir()):
         return error_msg("Couldn't find template directory")
 
-    dest_path = project_root / f"day{args.day}"
+    dest_path = project_root / f"day{args.day:0>2}"
 
     if dest_path.exists():
         return error_msg("The subpackage for this day already exits.")
