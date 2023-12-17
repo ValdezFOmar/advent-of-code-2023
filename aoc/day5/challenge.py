@@ -1,7 +1,7 @@
 import re
 from dataclasses import InitVar, dataclass, field
 from itertools import chain
-from typing import Iterable, Iterator, NamedTuple, TypeAlias
+from typing import Iterable, Iterator, NamedTuple
 
 import utils.iterutils as itu
 from aoc.tools import YieldStr, run_challenge

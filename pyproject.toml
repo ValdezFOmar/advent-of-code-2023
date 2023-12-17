@@ -26,22 +26,46 @@ pylint = "^3.0.2"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+
+
 [tool.pyright]
 reportConstantRedefinition = true
 # reportPrivateUsage = true
 
+
+
+[tool.pylint.main]
+ignore-paths = [
+    "aoc/tools/_day_template/*",
+    ".venv/",
+    "venv/",
+    ".pytest_cache/",
+    ".git/",
+]
+recursive = "yes"
+
+[tool.pylint.basic]
+good-names = ["TEST_OUTPUT"]
+
 [tool.pylint.messages_control]
-max-line-length = 100
 disable = [
     "missing-module-docstring",
     "missing-function-docstring",
     "missing-class-docstring",
     "redefined-builtin",
 ]
-good-names = ["TEST_OUTPUT"]
-ignore-paths = [
-    "aoc/tools/_day_template/*"
-]
+
+[tool.pylint.format]
+max-line-length = 100
 
 [tool.pylint.design]
 max-returns = 8
+
+
+
+[tool.pytest.ini_options]
+addopts = "--ignore=./aoc/tools/_day_template/"
+testpaths = [
+    "aoc",
+    "utils"
+]
