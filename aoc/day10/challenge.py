@@ -150,4 +150,4 @@ def solution_part_2(input: YieldStr) -> int:
 
 
 if __name__ == "__main__":
-    run_challenge(solution_part_2, __file__, debug=True)
+    run_challenge(solution_part_1, __file__, debug=True)

@@ -1,5 +1,4 @@
 input*.txt
-test-input*.txt
 output.txt
 pytest-output.txt
 
