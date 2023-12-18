@@ -56,9 +56,7 @@ def parse_input(input: YieldStr) -> Iterator[Race]:
     numbers = re.compile(r"\d+")
     times = [int(num) for num in numbers.findall(next(input))]
     distances = [int(num) for num in numbers.findall(next(input))]
-    races = (
-        Race(time, distance) for time, distance in zip(times, distances, strict=True)
-    )
+    races = (Race(time, distance) for time, distance in zip(times, distances, strict=True))
     return races
 
 

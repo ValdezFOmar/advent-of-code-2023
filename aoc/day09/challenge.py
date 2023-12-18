@@ -1,6 +1,5 @@
 from aoc.tools import YieldStr, run_challenge
-from utils.iterutils import (find_numbers, predict_next_number,
-                             predict_prev_number)
+from utils.iterutils import find_numbers, predict_next_number, predict_prev_number
 
 
 def retrive_sequences(input: YieldStr):

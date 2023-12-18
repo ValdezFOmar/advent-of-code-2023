@@ -4,7 +4,6 @@ import enum
 import sys
 from dataclasses import dataclass, field
 from itertools import islice
-from pprint import pprint
 from typing import ClassVar, Iterator, NamedTuple, TypeAlias
 
 import utils.iterutils as itu
@@ -144,9 +143,7 @@ def solution_part_2(input: YieldStr) -> int:
         sep="\n",
     )
 
-    for row, line in enumerate(
-        islice(tile_grid, top_most_row, bottom_most_row), top_most_row
-    ):
+    for row, line in enumerate(islice(tile_grid, top_most_row, bottom_most_row), top_most_row):
         pass
 
     return 0

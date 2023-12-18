@@ -9,9 +9,7 @@ from typing import Iterable
 from aoc.tools import YieldStr, run_challenge
 
 camel_cards_symbols = ("2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A")
-camel_cards: dict[str, int] = {
-    symbol: value for value, symbol in enumerate(camel_cards_symbols)
-}
+camel_cards: dict[str, int] = {symbol: value for value, symbol in enumerate(camel_cards_symbols)}
 
 
 # Order matters

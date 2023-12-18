@@ -2,8 +2,7 @@ import pytest
 
 from aoc.tools import relative_test_file
 
-from .challenge import (CategoryMapper, MappingRange, solution_part_1,
-                        solution_part_2)
+from .challenge import CategoryMapper, MappingRange, solution_part_1, solution_part_2
 
 
 @pytest.mark.parametrize(

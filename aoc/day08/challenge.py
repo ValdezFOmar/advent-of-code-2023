@@ -16,9 +16,7 @@ Network = dict[str, Node]
 
 def parse_input(input: YieldStr) -> tuple[str, Network]:
     instructions = next(input).strip()
-    node_expression = re.compile(
-        r"^(?P<node>\w+)\s*=\s*\((?P<left>\w+),\s*(?P<right>\w+)\)$"
-    )
+    node_expression = re.compile(r"^(?P<node>\w+)\s*=\s*\((?P<left>\w+),\s*(?P<right>\w+)\)$")
     network: Network = {}
     for line in input:
         match = node_expression.match(line)
@@ -58,9 +56,7 @@ def steps_until_condition(
 
 
 def steps_to_node(start: str, target: str, directions: str, network: Network) -> int:
-    return steps_until_condition(
-        start, lambda node: node == target, directions, network
-    )
+    return steps_until_condition(start, lambda node: node == target, directions, network)
 
 
 def solution_part_1(input: YieldStr) -> int:

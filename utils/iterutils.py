@@ -48,8 +48,7 @@ def items_difference(sequence: Sequence[int]) -> Iterator[list[int]]:
 
     while True:
         sequence = [
-            item - prev_item
-            for prev_item, item in zip(sequence, islice(sequence, 1, None))
+            item - prev_item for prev_item, item in zip(sequence, islice(sequence, 1, None))
         ]
         yield sequence
 

@@ -52,9 +52,7 @@ def adjacent_cells(
         for column_deviation in range(start_column, end_column):
             if (
                 row_deviation == 0
-                and pos_column_start
-                <= column_deviation + pos_column_start
-                <= pos_column_end - 1
+                and pos_column_start <= column_deviation + pos_column_start <= pos_column_end - 1
             ):
                 continue
 
@@ -78,15 +76,15 @@ def adjacent_cells_to_line(
     return adjacent_cells(matrix, pos_row, pos_column_start, pos_column_end)
 
 
-def adjacent_cells_to_cell(
-    matrix: Matrix2D[T], row: int, col: int
-) -> Iterator[Cell[T]]:
+def adjacent_cells_to_cell(matrix: Matrix2D[T], row: int, col: int) -> Iterator[Cell[T]]:
     """Adjacent cells to a single cell."""
     return adjacent_cells(matrix, row, col, col + 1)
 
 
 def inline_number_from_cell(
-    matrix: Matrix2D[str], cell: Cell[str], visited_positions: Positions
+    matrix: Matrix2D[str],
+    cell: Cell[str],
+    visited_positions: Positions,
 ) -> str:
     number = cell.value
     left_ptr = -1
@@ -122,7 +120,7 @@ def find_adjacent_numbers(
     row: int,
     col: int,
     *,
-    cells: Iterable[Cell[str]] | None = None
+    cells: Iterable[Cell[str]] | None = None,
 ) -> Iterator[int]:
     """Return the all the adjacent numbers to a single cell."""
     if cells is None:

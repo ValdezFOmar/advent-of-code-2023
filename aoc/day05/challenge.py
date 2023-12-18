@@ -35,13 +35,9 @@ class MappingRange:
         if _range == self.source:
             return self.dest
         lower_bound = (
-            self.map(_range.start)
-            if _range.start != self.source.start
-            else self.dest.start
+            self.map(_range.start) if _range.start != self.source.start else self.dest.start
         )
-        upper_bound = (
-            self.map(_range.stop) if _range.stop != self.source.stop else self.dest.stop
-        )
+        upper_bound = self.map(_range.stop) if _range.stop != self.source.stop else self.dest.stop
         return range(lower_bound, upper_bound)
 
     def is_before(self, r: range) -> bool:
