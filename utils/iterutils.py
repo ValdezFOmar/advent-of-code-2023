@@ -24,6 +24,11 @@ def length_range(start: int, length: int) -> range:
     return range(start, start + length)
 
 
+def ilen(iterable: Iterable[object]) -> int:
+    """len(), but for iterators/generators."""
+    return reduce(lambda l, _: l + 1, iterable, 0)
+
+
 # Taken from https://docs.python.org/3.12/library/itertools.html#itertools.batched
 # This function is only available in ^3.12
 def batched(iterable: Iterable[T], n: int) -> Iterator[tuple[T, ...]]:

@@ -14,7 +14,7 @@ def read_lines_from_file(path: StrPath) -> Iterator[str]:
     """Yields one line at a time for a given file."""
     with open(path, "r", encoding="utf-8") as file:
         for line in file:
-            yield line
+            yield line.strip()
 
 
 def relative_test_file(relative_to: StrPath, name: str | None = None) -> Iterator[str]:
