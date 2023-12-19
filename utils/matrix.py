@@ -1,5 +1,4 @@
-from typing import (Generic, Iterable, Iterator, MutableSet, NamedTuple,
-                    Sequence, TypeVar)
+from typing import Generic, Iterable, Iterator, MutableSet, NamedTuple, Sequence, TypeVar
 
 T = TypeVar("T")
 Matrix2D = Sequence[Sequence[T]]

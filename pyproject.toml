@@ -43,6 +43,11 @@ include = '''
     |utils/
 )
 '''
+extend-exclude = '''
+(
+    \.txt$
+)
+'''
 
 
 
