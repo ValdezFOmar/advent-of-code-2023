@@ -14,9 +14,14 @@ class Cell(NamedTuple, Generic[T]):
     column: int
 
 
+def itranspose(m: Iterable[Iterable[T]], /) -> Iterator[tuple[T, ...]]:
+    """Same as `transpose`, but in iterator form."""
+    return zip(*m, strict=True)
+
+
 def transpose(m: Matrix2D[T], /) -> list[tuple[T, ...]]:
     """Transpose a matrix, turning columns into rows and rows into columns."""
-    return list(zip(*m, strict=True))
+    return list(itranspose(m))
 
 
 def calc_position_deviation(

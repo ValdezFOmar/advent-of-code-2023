@@ -13,6 +13,27 @@ iter_numbers = _nums_regex.finditer
 find_numbers = _nums_regex.findall
 
 
+def divide_by(value: object, iterable: Iterable[T]) -> Iterator[tuple[T, ...]]:
+    """Divide iterable into subsequences at the given value."""
+    values: list[T] = []
+
+    for item in iterable:
+        if item != value:
+            values.append(item)
+        else:
+            yield tuple(values)
+            values = []
+    yield tuple(values)
+
+
+def join_from_iter(iterable: Iterable[Iterable[T]], value: T) -> Iterator[T]:
+    """Like str.join(), but yield the elements of the iterables inside another iterable."""
+    for it in iterable:
+        for item in it:
+            yield item
+        yield value
+
+
 def get_index(seq: Sequence[T], value: T) -> int | None:
     try:
         return seq.index(value)
