@@ -1,8 +1,9 @@
-from typing import Generic, Iterable, Iterator, MutableSet, NamedTuple, Sequence, TypeVar
+from typing import (Generic, Iterable, Iterator, MutableSet, NamedTuple,
+                    Sequence, TypeAlias, TypeVar)
 
 T = TypeVar("T")
-Matrix2D = Sequence[Sequence[T]]
-Positions = MutableSet[tuple[int, int]]
+Matrix2D: TypeAlias = Sequence[Sequence[T]]
+Positions: TypeAlias = MutableSet[tuple[int, int]]
 
 
 class Cell(NamedTuple, Generic[T]):
@@ -11,6 +12,11 @@ class Cell(NamedTuple, Generic[T]):
     value: T
     row: int
     column: int
+
+
+def transpose(m: Matrix2D[T], /) -> list[tuple[T, ...]]:
+    """Transpose a matrix, turning columns into rows and rows into columns."""
+    return list(zip(*m, strict=True))
 
 
 def calc_position_deviation(
