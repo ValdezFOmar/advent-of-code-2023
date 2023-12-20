@@ -13,7 +13,7 @@ def error_msg(msg: str) -> int:
     return 1
 
 
-def main() -> int | str:
+def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "day", metavar="D", help="The day to use for naming the subpakage.", type=int
@@ -28,10 +28,15 @@ def main() -> int | str:
 
     dest_path = project_root / f"day{args.day:0>2}"
 
-    if dest_path.exists():
+    try:
+        dest_copied = shutil.copytree(
+            src=template_dir,
+            dst=dest_path,
+            ignore=shutil.ignore_patterns("__pycache__/"),
+        )
+    except FileExistsError:
         return error_msg("The subpackage for this day already exits.")
 
-    dest_copied = shutil.copytree(src=template_dir, dst=dest_path)
     print("Subpackage create at:", dest_copied)
 
     return 0
