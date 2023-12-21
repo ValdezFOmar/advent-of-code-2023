@@ -1,9 +1,54 @@
-from typing import (Generic, Iterable, Iterator, MutableSet, NamedTuple,
-                    Sequence, TypeAlias, TypeVar)
+from __future__ import annotations
+
+import enum
+from typing import Generic, Iterable, Iterator, MutableSet, NamedTuple, Sequence, TypeAlias, TypeVar
 
 T = TypeVar("T")
-Matrix2D: TypeAlias = Sequence[Sequence[T]]
+Matrix2D: TypeAlias = Sequence[Sequence[T]]  # pylint: disable=C0103
 Positions: TypeAlias = MutableSet[tuple[int, int]]
+
+
+class Vector(NamedTuple):
+    """Simple class for making operations with vectors."""
+
+    row: int
+    column: int
+
+    def manhattan_distance(self, point: Vector, /) -> int:
+        return self.horizontal_distance(point) + self.vertical_distance(point)
+
+    def horizontal_distance(self, point: Vector, /) -> int:
+        return abs(self.row - point.row)
+
+    def vertical_distance(self, point: Vector, /) -> int:
+        return abs(self.column - point.column)
+
+    def __add__(self, other: object) -> Vector:
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.__class__(self.row + other.row, self.column + other.column)
+
+    def __iadd__(self, other: object) -> Vector:
+        return self.__add__(other)
+
+    def __radd__(self, other: object) -> Vector:
+        return self.__add__(other)
+
+    def __mul__(self, value: object) -> Vector:
+        if isinstance(value, int):
+            return self.__class__(self.row * value, self.column * value)
+        return NotImplemented
+
+
+class Direction(Vector, enum.Enum):
+    UP = (-1, 0)
+    DOWN = (1, 0)
+    LEFT = (0, -1)
+    RIGHT = (0, 1)
+
+    @property
+    def opposite(self) -> Direction:
+        return self.__class__(self.value * -1)  # pyright: ignore
 
 
 class Cell(NamedTuple, Generic[T]):

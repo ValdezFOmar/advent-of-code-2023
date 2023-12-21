@@ -1,33 +1,12 @@
 from __future__ import annotations
 
-import enum
 import io
-import pprint
 from dataclasses import dataclass, field
 from functools import reduce
-from typing import NamedTuple, Sequence
+from typing import Sequence
 
 from aoc.tools import YieldStr, run_challenge
-
-
-class Vector(NamedTuple):
-    row: int
-    column: int
-
-    def __add__(self, other: object) -> Vector:
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return self.__class__(self.row + other.row, self.column + other.column)
-
-    def __iadd__(self, other: object) -> Vector:
-        return self.__add__(other)
-
-
-class Direction(Vector, enum.Enum):
-    UP = (-1, 0)
-    DOWN = (1, 0)
-    LEFT = (0, -1)
-    RIGHT = (0, 1)
+from utils.matrix import Direction, Vector
 
 
 class Tile:

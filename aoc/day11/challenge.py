@@ -2,25 +2,10 @@ from __future__ import annotations
 
 import re
 from itertools import combinations
-from typing import Iterable, NamedTuple
 
 import utils.iterutils as itu
 from aoc.tools import YieldStr, run_challenge
-
-
-class Point(NamedTuple):
-    row: int
-    column: int
-
-    def manhattan_distance(self, point: Point, /) -> int:
-        return self.horizontal_distance(point) + self.vertical_distance(point)
-
-    def horizontal_distance(self, point: Point, /) -> int:
-        return abs(self.row - point.row)
-
-    def vertical_distance(self, point: Point, /) -> int:
-        return abs(self.column - point.column)
-
+from utils.matrix import Vector as Point
 
 galaxy_finder = re.compile(r"#").finditer
 

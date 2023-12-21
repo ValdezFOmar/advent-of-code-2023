@@ -1,44 +1,17 @@
 from __future__ import annotations
 
-import enum
 import sys
 from dataclasses import dataclass, field
-from itertools import islice
-from typing import ClassVar, Iterator, NamedTuple, TypeAlias
+
+# from itertools import islice
+from typing import ClassVar, Iterator, TypeAlias
 
 import utils.iterutils as itu
 from aoc.tools import YieldStr, run_challenge
+from utils.matrix import Direction
+from utils.matrix import Vector as Point
 
 TilesGrid: TypeAlias = list[str]
-
-
-class Point(NamedTuple):
-    row: int
-    column: int
-
-    def __add__(self, other: object) -> Point:
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return self.__class__(self.row + other.row, self.column + other.column)
-
-    def __radd__(self, other: object) -> Point:
-        return self.__add__(other)
-
-    def __mul__(self, value: object) -> Point:
-        if isinstance(value, int):
-            return self.__class__(self.row * value, self.column * value)
-        return NotImplemented
-
-
-class Direction(Point, enum.Enum):
-    UP = (-1, 0)
-    DOWN = (1, 0)
-    LEFT = (0, -1)
-    RIGHT = (0, 1)
-
-    @property
-    def opposite(self) -> Direction:
-        return self.__class__(self.value * -1)  # pyright: ignore
 
 
 @dataclass(slots=True, eq=False)
@@ -143,8 +116,7 @@ def solution_part_2(input: YieldStr) -> int:
         sep="\n",
     )
 
-    for row, line in enumerate(islice(tile_grid, top_most_row, bottom_most_row), top_most_row):
-        pass
+    # for row, line in enumerate(islice(tile_grid, top_most_row, bottom_most_row), top_most_row):
 
     return 0
 

@@ -1,5 +1,4 @@
 import itertools as itt
-from pprint import pprint
 from typing import Iterator, TypeAlias
 
 from aoc.tools import YieldStr, run_challenge
