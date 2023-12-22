@@ -4,13 +4,25 @@
 import re
 from functools import reduce
 from itertools import islice
-from typing import Iterable, Iterator, Sequence, TypeVar
+from typing import Iterable, Iterator, Sequence, TypeVar, cast
 
 T = TypeVar("T")
 
 _nums_regex = re.compile(r"-?\d+")
 iter_numbers = _nums_regex.finditer
 find_numbers = _nums_regex.findall
+
+_SENTINEL = object()
+
+
+def last_item(iterator: Iterator[T]) -> T:
+    """Exhausts an iterator and return the last item."""
+    item = _SENTINEL
+    for item in iterator:
+        pass
+    if item is _SENTINEL:
+        raise RuntimeError("Iterator is empty")
+    return cast(T, item)
 
 
 def divide_by(value: object, iterable: Iterable[T]) -> Iterator[tuple[T, ...]]:
