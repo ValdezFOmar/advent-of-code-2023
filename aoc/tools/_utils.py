@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Iterator
+from typing import TYPE_CHECKING, Callable, Iterator, TypeAlias
 
 if TYPE_CHECKING:
     from _typeshed import StrPath
 
 
-YieldStr = Iterator[str]
+YieldStr: TypeAlias = Iterator[str]
 
 
 def read_lines_from_file(path: StrPath) -> Iterator[str]:

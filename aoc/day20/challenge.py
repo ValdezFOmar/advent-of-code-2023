@@ -149,7 +149,8 @@ class ModuleComunicator:
                 dest_module = self._modules.get(dest_module_name)
                 if dest_module is None:
                     print(
-                        f"Module with name '{dest_module_name}' doesn't exist, creating EndModule...",
+                        f"Module with name '{dest_module_name}'"
+                        " doesn't exist, creating EndModule...",
                         file=sys.stderr,
                     )
                     end_modules.append(EndModule(dest_module_name))

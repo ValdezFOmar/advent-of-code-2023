@@ -91,7 +91,7 @@ class PartValidator:
 def parse_part(string: str) -> Part:
     string = string.replace("{", "(").replace("}", ")")
     string = "dict" + string
-    return eval(string)
+    return eval(string)  # pylint: disable=W0123
 
 
 # Answer is 'too' low, so some parts are no being evaluated correctly

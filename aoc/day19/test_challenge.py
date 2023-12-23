@@ -1,11 +1,11 @@
+# pylint: disable=W0621
 from itertools import takewhile
 
 import pytest
 
 from aoc.tools import relative_test_file
 
-from .challenge import (PartValidator, Rule, Workflow, solution_part_1,
-                        solution_part_2)
+from .challenge import PartValidator, Rule, Workflow, solution_part_1, solution_part_2
 
 
 @pytest.fixture

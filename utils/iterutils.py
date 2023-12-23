@@ -1,10 +1,11 @@
 """Utilities for iterating and working with iterables / sequences."""
 
 
+import enum
 import re
 from functools import reduce
 from itertools import islice
-from typing import Iterable, Iterator, Sequence, TypeVar, cast
+from typing import Iterable, Iterator, Sequence, TypeVar
 
 T = TypeVar("T")
 
@@ -12,17 +13,22 @@ _nums_regex = re.compile(r"-?\d+")
 iter_numbers = _nums_regex.finditer
 find_numbers = _nums_regex.findall
 
-_SENTINEL = object()
+
+class _Empty(enum.Enum):
+    TOKEN = 0
+
+
+_empty = _Empty.TOKEN
 
 
 def last_item(iterator: Iterator[T]) -> T:
     """Exhausts an iterator and return the last item."""
-    item = _SENTINEL
+    item: T | _Empty = _empty
     for item in iterator:
         pass
-    if item is _SENTINEL:
-        raise RuntimeError("Iterator is empty")
-    return cast(T, item)
+    if item is _empty:
+        raise ValueError("Iterator is empty")
+    return item
 
 
 def divide_by(value: object, iterable: Iterable[T]) -> Iterator[tuple[T, ...]]:
