@@ -94,6 +94,7 @@ def parse_part(string: str) -> Part:
     return eval(string)
 
 
+# Answer is 'too' low, so some parts are no being evaluated correctly
 def solution_part_1(input: YieldStr) -> int:
     workflows = (Workflow.from_line(line) for line in takewhile(bool, input))
     pv = PartValidator(workflows)
