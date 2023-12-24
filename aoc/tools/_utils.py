@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Iterator, TypeAlias
 
@@ -41,4 +42,5 @@ def run_challenge(
     """Runs the challenge solution with the given input and prints its output."""
     name = None if debug else "input.txt"
     output = solution(relative_test_file(relative_to, name, reader))
-    print(f"{solution.__name__}: {output:<20,}{output}")
+    real_func = solution if not isinstance(solution, functools.partial) else solution.func
+    print(f"{real_func.__name__}: {output:<20,}{output}")
