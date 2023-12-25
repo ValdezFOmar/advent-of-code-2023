@@ -1,7 +1,18 @@
 from __future__ import annotations
 
 import enum
-from typing import Generic, Iterable, Iterator, MutableSet, NamedTuple, Sequence, TypeAlias, TypeVar
+import operator
+from typing import (
+    Callable,
+    Generic,
+    Iterable,
+    Iterator,
+    MutableSet,
+    NamedTuple,
+    Sequence,
+    TypeAlias,
+    TypeVar,
+)
 
 T = TypeVar("T")
 Matrix2D: TypeAlias = Sequence[Sequence[T]]  # pylint: disable=C0103
@@ -14,6 +25,9 @@ class Vector(NamedTuple):
     row: int
     column: int
 
+    def __str__(self) -> str:
+        return f"({self.row}, {self.column})"
+
     def manhattan_distance(self, point: Vector, /) -> int:
         return self.horizontal_distance(point) + self.vertical_distance(point)
 
@@ -23,10 +37,17 @@ class Vector(NamedTuple):
     def vertical_distance(self, point: Vector, /) -> int:
         return abs(self.column - point.column)
 
+    def _operation(self, other: object, operation) -> Vector:
+        if isinstance(other, type(self)):
+            return self.__class__(
+                operation(self.row, other.row), operation(self.column, other.column)
+            )
+        if isinstance(other, int):
+            return self.__class__(operation(self.row, other), operation(self.column, other))
+        return NotImplemented
+
     def __add__(self, other: object) -> Vector:
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return self.__class__(self.row + other.row, self.column + other.column)
+        return self._operation(other, operator.add)
 
     def __iadd__(self, other: object) -> Vector:
         return self.__add__(other)
@@ -34,17 +55,18 @@ class Vector(NamedTuple):
     def __radd__(self, other: object) -> Vector:
         return self.__add__(other)
 
+    def __sub__(self, other: object) -> Vector:
+        return self._operation(other, operator.sub)
+
     def __mul__(self, value: object) -> Vector:
-        if isinstance(value, int):
-            return self.__class__(self.row * value, self.column * value)
-        return NotImplemented
+        return self._operation(value, operator.mul)
 
 
 class Direction(Vector, enum.Enum):
     UP = (-1, 0)
+    RIGHT = (0, 1)
     DOWN = (1, 0)
     LEFT = (0, -1)
-    RIGHT = (0, 1)
 
     @property
     def opposite(self) -> Direction:

@@ -1,5 +1,5 @@
 input*.txt
-output.txt
+output*.txt
 pytest-output.txt
 
 !aoc/tools/_day_template/*.txt
