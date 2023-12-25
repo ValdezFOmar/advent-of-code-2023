@@ -17,6 +17,9 @@ class HikePath:
     current_position: Point
     previous_position: Point
 
+    def __len__(self) -> int:
+        return len(self.path)
+
     def add_position(self, position: Point) -> None:
         self.path.add(position)
         self.previous_position = self.current_position
@@ -98,6 +101,11 @@ def find_paths(layout_map: Map, start: Point, end: Point) -> list[HikePath]:
     return final_paths
 
 
+def dump_paths(layout: Map, hike_paths: list[HikePath]) -> None:
+    for i, hike_path in enumerate(hike_paths, 1):
+        hike_path.output_hike(layout, f"output-{i:0>3}.txt")
+
+
 def solution_part_1(input: YieldStr) -> int:
     island_map = list(input)
     start_column = island_map[0].index(Tile.PATH)
@@ -107,11 +115,9 @@ def solution_part_1(input: YieldStr) -> int:
     end_position = Point(len(island_map) - 1, end_column)
 
     hike_paths = find_paths(island_map, start_position, end_position)
+    # dump_paths(island_map, hike_paths)
 
-    for i, hike_path in enumerate(hike_paths, 1):
-        hike_path.output_hike(island_map, f"output-{i}.txt")
-
-    return max(len(hike_path.path) for hike_path in hike_paths)
+    return max(len(hike_path) for hike_path in hike_paths)
 
 
 def solution_part_2(input: YieldStr) -> int:
