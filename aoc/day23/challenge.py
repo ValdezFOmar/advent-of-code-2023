@@ -48,6 +48,7 @@ class Tile(enum.StrEnum):
     LEFT_SLOPE = "<"
     RIGHT_SLOPE = ">"
 
+    # pylint: disable=R0916
     def can_pass(self, direction: Direction) -> bool:
         if self is Tile.FOREST:
             return False

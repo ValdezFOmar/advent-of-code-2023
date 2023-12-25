@@ -2,17 +2,7 @@ from __future__ import annotations
 
 import enum
 import operator
-from typing import (
-    Callable,
-    Generic,
-    Iterable,
-    Iterator,
-    MutableSet,
-    NamedTuple,
-    Sequence,
-    TypeAlias,
-    TypeVar,
-)
+from typing import Generic, Iterable, Iterator, MutableSet, NamedTuple, Sequence, TypeAlias, TypeVar
 
 T = TypeVar("T")
 Matrix2D: TypeAlias = Sequence[Sequence[T]]  # pylint: disable=C0103
