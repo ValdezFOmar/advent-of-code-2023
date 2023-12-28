@@ -16,7 +16,10 @@ def error_msg(msg: str) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "day", metavar="D", help="The day to use for naming the subpakage.", type=int
+        "day",
+        metavar="D",
+        help="The day to use for naming the subpakage.",
+        type=int,
     )
     args = parser.parse_args()
 
@@ -37,7 +40,7 @@ def main() -> int:
     except FileExistsError:
         return error_msg("The subpackage for this day already exits.")
 
-    print("Subpackage create at:", dest_copied)
+    print("Subpackage created at:", dest_copied)
 
     return 0
 
