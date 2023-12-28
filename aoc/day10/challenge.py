@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass, field
-
-# from itertools import islice
 from typing import ClassVar, Iterator, TypeAlias
 
 import utils.iterutils as itu
 from aoc.tools import YieldStr, run_challenge
-from utils.matrix import Direction
-from utils.matrix import Vector as Point
+from utils import extra_math
+from utils.matrix import Direction, Point
 
 TilesGrid: TypeAlias = list[str]
 
@@ -94,31 +91,9 @@ def solution_part_1(input: YieldStr) -> int:
 
 def solution_part_2(input: YieldStr) -> int:
     tile_grid, starting_point = parse_input(input)
-    pipes_loop = set[Point]()
-
-    top_most_row = sys.maxsize
-    bottom_most_row = 0
-    left_most_column = sys.maxsize
-    right_most_column = 0
-
-    for pipe in find_pipes_loop(tile_grid, starting_point):
-        pipes_loop.add(pipe.position)
-        top_most_row = min(top_most_row, pipe.position.row)
-        bottom_most_row = max(bottom_most_row, pipe.position.row)
-        left_most_column = min(left_most_column, pipe.position.column)
-        right_most_column = max(right_most_column, pipe.position.column)
-
-    print(
-        f"{top_most_row=}",
-        f"{bottom_most_row=}",
-        f"{left_most_column=}",
-        f"{right_most_column=}",
-        sep="\n",
-    )
-
-    # for row, line in enumerate(islice(tile_grid, top_most_row, bottom_most_row), top_most_row):
-
-    return 0
+    points = [pipe.position for pipe in find_pipes_loop(tile_grid, starting_point)]
+    area = extra_math.shoelace_formula(points)
+    return extra_math.number_interior_points(area, len(points))
 
 
 if __name__ == "__main__":

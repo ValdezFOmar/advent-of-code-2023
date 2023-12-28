@@ -1,33 +1,49 @@
-from __future__ import annotations
-
 import enum
 import operator
-from typing import Generic, Iterable, Iterator, MutableSet, NamedTuple, Sequence, TypeAlias, TypeVar
+from typing import (
+    Generic,
+    Iterable,
+    Iterator,
+    MutableSet,
+    NamedTuple,
+    Self,
+    Sequence,
+    TypeAlias,
+    TypeVar,
+)
 
 T = TypeVar("T")
 Matrix2D: TypeAlias = Sequence[Sequence[T]]  # pylint: disable=C0103
 Positions: TypeAlias = MutableSet[tuple[int, int]]
 
 
-class Vector(NamedTuple):
-    """Simple class for making operations with vectors."""
+class Point(NamedTuple):
+    """Simple class for making operations with points in a 2D grid."""
 
     row: int
     column: int
 
+    @property
+    def x(self) -> int:
+        return self.column
+
+    @property
+    def y(self) -> int:
+        return self.row
+
     def __str__(self) -> str:
         return f"({self.row}, {self.column})"
 
-    def manhattan_distance(self, point: Vector, /) -> int:
+    def manhattan_distance(self, point: Self, /) -> int:
         return self.horizontal_distance(point) + self.vertical_distance(point)
 
-    def horizontal_distance(self, point: Vector, /) -> int:
+    def horizontal_distance(self, point: Self, /) -> int:
         return abs(self.row - point.row)
 
-    def vertical_distance(self, point: Vector, /) -> int:
+    def vertical_distance(self, point: Self, /) -> int:
         return abs(self.column - point.column)
 
-    def _operation(self, other: object, operation) -> Vector:
+    def _operation(self, other: object, operation) -> Self:
         if isinstance(other, type(self)):
             return self.__class__(
                 operation(self.row, other.row), operation(self.column, other.column)
@@ -36,30 +52,30 @@ class Vector(NamedTuple):
             return self.__class__(operation(self.row, other), operation(self.column, other))
         return NotImplemented
 
-    def __add__(self, other: object) -> Vector:
+    def __add__(self, other: object) -> Self:
         return self._operation(other, operator.add)
 
-    def __iadd__(self, other: object) -> Vector:
+    def __iadd__(self, other: object) -> Self:
         return self.__add__(other)
 
-    def __radd__(self, other: object) -> Vector:
+    def __radd__(self, other: object) -> Self:
         return self.__add__(other)
 
-    def __sub__(self, other: object) -> Vector:
+    def __sub__(self, other: object) -> Self:
         return self._operation(other, operator.sub)
 
-    def __mul__(self, value: object) -> Vector:
+    def __mul__(self, value: object) -> Self:
         return self._operation(value, operator.mul)
 
 
-class Direction(Vector, enum.Enum):
+class Direction(Point, enum.Enum):
     UP = (-1, 0)
     RIGHT = (0, 1)
     DOWN = (1, 0)
     LEFT = (0, -1)
 
     @property
-    def opposite(self) -> Direction:
+    def opposite(self) -> Self:
         return self.__class__(self.value * -1)  # pyright: ignore
 
 

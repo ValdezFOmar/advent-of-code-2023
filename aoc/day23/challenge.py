@@ -5,8 +5,7 @@ from pathlib import Path
 from typing import TypeAlias
 
 from aoc.tools import YieldStr, run_challenge
-from utils.matrix import Direction
-from utils.matrix import Vector as Point
+from utils.matrix import Direction, Point
 
 Map: TypeAlias = list[str]
 

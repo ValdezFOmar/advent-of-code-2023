@@ -6,7 +6,7 @@ from functools import reduce
 from typing import Sequence
 
 from aoc.tools import YieldStr, run_challenge
-from utils.matrix import Direction, Vector
+from utils.matrix import Direction, Point
 
 
 class Tile:
@@ -99,7 +99,7 @@ class Splitter(Tile, chars="|-"):
 
 @dataclass(slots=True)
 class Beam:
-    position: Vector
+    position: Point
     direction: Direction
     active: bool = field(init=False, default=True)
 
@@ -126,7 +126,7 @@ class Contraption:
     beams: set[Beam] = field(init=False, default_factory=set)
 
     def __post_init__(self):
-        self.beams.add(Beam(Vector(0, -1), Direction.RIGHT))
+        self.beams.add(Beam(Point(0, -1), Direction.RIGHT))
 
     @classmethod
     def from_input(cls, input: YieldStr):
@@ -182,7 +182,7 @@ class Contraption:
         return buf.getvalue()
 
     def __getitem__(self, key: object) -> Tile:
-        if isinstance(key, Vector):
+        if isinstance(key, Point):
             return self.layout[key.row][key.column]
         return NotImplemented
 

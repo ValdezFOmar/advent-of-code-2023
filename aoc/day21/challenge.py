@@ -3,8 +3,7 @@ from typing import Iterator, Sequence
 
 from aoc.tools import YieldStr, run_challenge
 from utils.iterutils import get_index
-from utils.matrix import Direction
-from utils.matrix import Vector as Point
+from utils.matrix import Direction, Point
 
 Garden = Sequence[str]
 

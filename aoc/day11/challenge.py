@@ -1,11 +1,9 @@
-from __future__ import annotations
-
 import re
 from itertools import combinations
 
 import utils.iterutils as itu
 from aoc.tools import YieldStr, run_challenge
-from utils.matrix import Vector as Point
+from utils.matrix import Point
 
 galaxy_finder = re.compile(r"#").finditer
 
