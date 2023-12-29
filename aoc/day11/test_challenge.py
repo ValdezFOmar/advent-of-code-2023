@@ -1,15 +1,18 @@
+import functools
+
 import pytest
 
 from aoc.tools import relative_test_file
 
-from .challenge import solution_part_1, solution_part_2
+from .challenge import general_solution
 
 
 @pytest.mark.parametrize(
     "solution, output",
     [
-        (solution_part_1, 374),
-        (solution_part_2, 0),
+        (functools.partial(general_solution, expansion_factor=2), 374),
+        (functools.partial(general_solution, expansion_factor=10), 1030),
+        (functools.partial(general_solution, expansion_factor=100), 8410),
     ],
 )
 def test_solution(solution, output):

@@ -1,7 +1,6 @@
 """Module for implementing math formulas/theorems for use in solutions."""
 
 import itertools
-from functools import reduce
 from typing import Sequence
 
 from .matrix import Point
@@ -15,7 +14,7 @@ def shoelace_formula(points: Sequence[Point]) -> float:
         return (p1.x * p2.y) - (p1.y * p2.x)
 
     points_pairs = itertools.pairwise(itertools.chain(points, [points[0]]))
-    doubled_area = reduce(lambda area, points: area + _determinant(*points), points_pairs, 0)
+    doubled_area = sum(_determinant(*pair) for pair in points_pairs)
     return abs(doubled_area / 2)
 
 

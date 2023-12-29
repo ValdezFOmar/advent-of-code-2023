@@ -33,7 +33,7 @@ def expansion_between_points(
     p2: Point,
     rows: set[int],
     columns: set[int],
-    expansion_factor=2,
+    expansion_factor: int,
 ) -> int:
     rows_between = itu.length_range(
         p1.row if p1.row < p2.row else p2.row, p1.horizontal_distance(p2)
@@ -50,20 +50,26 @@ def expansion_between_points(
     return num_expanded_rows + num_expanded_columns
 
 
-def solution_part_1(input: YieldStr) -> int:
+def general_solution(input: YieldStr, expansion_factor: int) -> int:
     galaxies_coords, rows, columns = parse_input(input)
     sum_of_distances = 0
 
     for p1, p2 in combinations(galaxies_coords, 2):
         distance = p1.manhattan_distance(p2)
-        expansion = expansion_between_points(p1, p2, rows, columns)
+        expansion = expansion_between_points(
+            p1, p2, rows, columns, expansion_factor=expansion_factor
+        )
         sum_of_distances += distance + expansion
 
     return sum_of_distances
 
 
+def solution_part_1(input: YieldStr) -> int:
+    return general_solution(input, expansion_factor=2)
+
+
 def solution_part_2(input: YieldStr) -> int:
-    return 0
+    return general_solution(input, expansion_factor=1_000_000)
 
 
 if __name__ == "__main__":
