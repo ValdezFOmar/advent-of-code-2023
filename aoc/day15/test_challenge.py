@@ -9,7 +9,7 @@ from .challenge import read_until_comma, solution_part_1, solution_part_2
     "solution, output",
     [
         (solution_part_1, 1320),
-        (solution_part_2, 0),
+        (solution_part_2, 145),
     ],
 )
 def test_solution(solution, output):

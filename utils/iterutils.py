@@ -2,9 +2,9 @@
 
 
 import enum
+import itertools
 import re
 from functools import reduce
-from itertools import islice
 from typing import Iterable, Iterator, Sequence, TypeVar
 
 T = TypeVar("T")
@@ -46,10 +46,16 @@ def divide_by(value: object, iterable: Iterable[T]) -> Iterator[tuple[T, ...]]:
 
 def join_from_iter(iterable: Iterable[Iterable[T]], value: T) -> Iterator[T]:
     """Like str.join(), but yield the elements of the iterables inside another iterable."""
-    for it in iterable:
+    iters = iter(iterable)
+    try:
+        first_it = next(iters)
+    except StopIteration:
+        return
+    yield from first_it
+    for it in iters:
+        yield value
         for item in it:
             yield item
-        yield value
 
 
 def get_index(seq: Sequence[T], value: T) -> int | None:
@@ -71,12 +77,21 @@ def ilen(iterable: Iterable[object]) -> int:
 # Taken from https://docs.python.org/3.12/library/itertools.html#itertools.batched
 # This function is only available in ^3.12
 def batched(iterable: Iterable[T], n: int) -> Iterator[tuple[T, ...]]:
-    """batched('ABCDEFG', 3) --> ABC DEF G"""
+    """Batch data into tuples of length n. The last batch may be shorter.
+
+    batched('ABCDEFG', 3) --> ABC DEF G
+    """
     if n < 1:
         raise ValueError("n must be at least one")
     it = iter(iterable)
-    while batch := tuple(islice(it, n)):
+    while batch := tuple(itertools.islice(it, n)):
         yield batch
+
+
+# https://docs.python.org/3.11/library/itertools.html#itertools-recipes
+def ncycles(iterable: Iterator[T], n: int) -> Iterator[T]:
+    """Returns the sequence elements n times"""
+    return itertools.chain.from_iterable(itertools.repeat(tuple(iterable), n))
 
 
 def items_difference(sequence: Sequence[int]) -> Iterator[list[int]]:
@@ -87,7 +102,8 @@ def items_difference(sequence: Sequence[int]) -> Iterator[list[int]]:
 
     while True:
         sequence = [
-            item - prev_item for prev_item, item in zip(sequence, islice(sequence, 1, None))
+            item - prev_item
+            for prev_item, item in zip(sequence, itertools.islice(sequence, 1, None))
         ]
         yield sequence
 

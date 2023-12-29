@@ -2,7 +2,7 @@ import itertools
 import re
 
 from aoc.tools import YieldStr, run_challenge
-from utils import adjacent_cells_to_line, find_adjacent_numbers
+from utils.matrix import adjacent_cells_to_line, find_adjacent_numbers
 
 VALID_SYMBOLS = frozenset({"@", "%", "-", "/", "*", "#", "=", "$", "+", "&"})
 
