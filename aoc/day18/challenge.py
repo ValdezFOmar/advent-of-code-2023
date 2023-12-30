@@ -32,8 +32,26 @@ def solution_part_1(input: YieldStr) -> int:
 
 
 def solution_part_2(input: YieldStr) -> int:
-    return 0
+    direction_to_dig = {
+        0: Direction.RIGHT,
+        1: Direction.DOWN,
+        2: Direction.LEFT,
+        3: Direction.UP,
+    }
+    boundary = 0
+    points: list[Point] = []
+    last_point = Point(0, 0)
+
+    for *_, hexcode in parse_input(input):
+        distance = int(hexcode[:5], base=16)
+        direction = direction_to_dig[int(hexcode[5])]
+        boundary += distance
+        last_point += direction.value * distance
+        points.append(last_point)
+
+    area = xmath.number_interior_points(xmath.shoelace_formula(points), boundary)
+    return area + boundary
 
 
 if __name__ == "__main__":
-    run_challenge(solution_part_1, __file__, debug=True)
+    run_challenge(solution_part_2, __file__, debug=True)

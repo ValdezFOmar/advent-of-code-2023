@@ -39,7 +39,7 @@ def relative_test_file(
 
 
 def format_output(solution_name: str, output: int) -> str:
-    return f"{solution_name}: {output:<15,}{output}"
+    return f"{solution_name}: {output:<20,}{output}"
 
 
 def run_challenge(
