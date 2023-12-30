@@ -1,16 +1,11 @@
-import pytest
-
-from aoc.tools import relative_test_file
+from aoc.tools import relative_input_file_path, relative_test_file
 
 from .challenge import solution_part_1, solution_part_2
 
 
-@pytest.mark.parametrize(
-    "solution, output",
-    [
-        (solution_part_1, 46),
-        (solution_part_2, 0),
-    ],
-)
-def test_solution(solution, output):
-    assert solution(relative_test_file(__file__)) == output
+def test_solution_1():
+    assert solution_part_1(relative_test_file(__file__)) == 46
+
+
+def test_solution_2():
+    assert solution_part_2(relative_input_file_path(__file__)) == 51

@@ -1,11 +1,10 @@
-from __future__ import annotations
-
 import io
-from dataclasses import dataclass, field
-from functools import reduce
+import multiprocessing
+from dataclasses import InitVar, dataclass, field
+from functools import partial, reduce
 from typing import Sequence
 
-from aoc.tools import YieldStr, run_challenge
+from aoc.tools import YieldStr, read_lines_from_file, run_challenge_with_path
 from utils.matrix import Direction, Point
 
 
@@ -46,6 +45,29 @@ class Tile:
 
     def __str__(self) -> str:
         return self._char
+
+
+@dataclass(slots=True)
+class Beam:
+    position: Point
+    direction: Direction
+    active: bool = field(init=False, default=True)
+
+    def hit_tile(self, tile: Tile) -> None:
+        if self.direction in tile.hit_directions:
+            self.active = False
+            return
+        tile.energized()
+        tile.hit_directions.add(self.direction)
+
+    def __hash__(self) -> int:
+        return id(self)
+
+    def update(self) -> None:
+        self.position += self.direction
+
+    def within_range(self, rows: range, columns: range) -> bool:
+        return self.position.row in rows and self.position.column in columns
 
 
 class Mirror(Tile, chars="/\\"):
@@ -98,42 +120,13 @@ class Splitter(Tile, chars="|-"):
 
 
 @dataclass(slots=True)
-class Beam:
-    position: Point
-    direction: Direction
-    active: bool = field(init=False, default=True)
-
-    def hit_tile(self, tile: Tile) -> None:
-        if self.direction in tile.hit_directions:
-            self.active = False
-            return
-        tile.energized()
-        tile.hit_directions.add(self.direction)
-
-    def __hash__(self) -> int:
-        return id(self)
-
-    def update(self) -> None:
-        self.position += self.direction
-
-    def within_range(self, rows: range, columns: range) -> bool:
-        return self.position.row in rows and self.position.column in columns
-
-
-@dataclass(slots=True)
 class Contraption:
     layout: Sequence[Sequence[Tile]]
+    starting_beam: InitVar[Beam]
     beams: set[Beam] = field(init=False, default_factory=set)
 
-    def __post_init__(self):
-        self.beams.add(Beam(Point(0, -1), Direction.RIGHT))
-
-    @classmethod
-    def from_input(cls, input: YieldStr):
-        contraption: list[list[Tile]] = []
-        for line in input:
-            contraption.append([Tile(char) for char in line])
-        return cls(contraption)
+    def __post_init__(self, starting_beam: Beam):
+        self.beams.add(starting_beam)
 
     def init_simulation(self):
         rows = range(0, len(self.layout))
@@ -166,6 +159,15 @@ class Contraption:
             self.beams.update(beams_to_add)
             self.beams.difference_update(beams_to_remove)
 
+    @classmethod
+    def from_input(cls, input: YieldStr, starting_beam: Beam | None = None):
+        contraption: list[list[Tile]] = []
+        for line in input:
+            contraption.append([Tile(char) for char in line])
+        if starting_beam is None:
+            starting_beam = Beam(Point(0, -1), Direction.RIGHT)
+        return cls(contraption, starting_beam)
+
     def count_energized_tiles(self) -> int:
         def sum_row(acc: int, tile: Tile) -> int:
             if tile.is_energized:
@@ -187,6 +189,29 @@ class Contraption:
         return NotImplemented
 
 
+def generate_all_configurations(num_rows: int, num_columns: int) -> list[Beam]:
+    beams: list[Beam] = []
+
+    for row in range(num_rows):
+        from_left = Beam(Point(row, -1), Direction.RIGHT)
+        from_right = Beam(Point(row, num_columns), Direction.LEFT)
+        beams.extend((from_left, from_right))
+
+    for column in range(num_columns):
+        from_above = Beam(Point(-1, column), Direction.DOWN)
+        from_below = Beam(Point(num_rows, column), Direction.UP)
+        beams.extend((from_above, from_below))
+
+    return beams
+
+
+def process_simulation(initial_beam: Beam, path: str) -> int:
+    input = read_lines_from_file(path)
+    contraption = Contraption.from_input(input, initial_beam)
+    contraption.init_simulation()
+    return contraption.count_energized_tiles()
+
+
 def solution_part_1(input: YieldStr) -> int:
     contraption = Contraption.from_input(input)
     contraption.init_simulation()
@@ -194,9 +219,18 @@ def solution_part_1(input: YieldStr) -> int:
     return count
 
 
-def solution_part_2(input: YieldStr) -> int:
-    return 0
+def solution_part_2(file_path: str) -> int:
+    num_rows = 0
+    num_columns = 0
+    for row, line in enumerate(read_lines_from_file(file_path), 1):
+        num_rows = row
+        num_columns = len(line)
+    configurations = generate_all_configurations(num_rows, num_columns)
+
+    with multiprocessing.Pool() as pool:
+        results = pool.map(partial(process_simulation, path=file_path), configurations)
+    return max(results)
 
 
 if __name__ == "__main__":
-    run_challenge(solution_part_1, __file__, debug=True)
+    run_challenge_with_path(solution_part_2, __file__, debug=True)
