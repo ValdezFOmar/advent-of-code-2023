@@ -1,14 +1,22 @@
-from __future__ import annotations
-
 import enum
+import logging
 import re
-import sys
 from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import InitVar, dataclass, field
-from typing import ClassVar, Iterable, NamedTuple
+from functools import reduce
+from pathlib import Path
+from typing import Callable, ClassVar, Iterable, NamedTuple, Self
 
 from aoc.tools import YieldStr, run_challenge
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename=Path(__file__).with_name("output-log.txt"),
+    filemode="w",
+    encoding="utf-8",
+    format="%(levelname)s: %(message)s",
+)
 
 
 class Bit(enum.IntEnum):
@@ -16,7 +24,7 @@ class Bit(enum.IntEnum):
     ON = 1
 
     @classmethod
-    def flip(cls, b: Bit) -> Bit:
+    def flip(cls, b: Self) -> Self:
         return cls((b + 1) & 1)
 
 
@@ -80,6 +88,10 @@ class Conjunction(Module):
         self._input_modules: dict[str, Bit] = {mod: Bit.OFF for mod in input_modules}
         super().__init__(name, destination_modules)
 
+    @property
+    def input_modules(self) -> dict[str, Bit]:
+        return self._input_modules
+
     def register_input(self, module: Module) -> None:
         self._input_modules[module.name] = Bit.OFF
 
@@ -107,7 +119,13 @@ class Conjunction(Module):
 
 class EndModule(Module):
     def __init__(self, name: str) -> None:
+        self.low_pulses_received = 0
         super().__init__(name, [])
+
+    def receive_pulse(self, pulse: Pulse) -> None:
+        super().receive_pulse(pulse)
+        if pulse.bit is Bit.OFF:
+            self.low_pulses_received += 1
 
     def send_pulse(self) -> list[Pulse]:
         return []
@@ -131,41 +149,41 @@ class Broadcaster(Module):
 
 @dataclass
 class ModuleComunicator:
-    modules: InitVar[Iterable[Module]]
-    _modules: dict[str, Module] = field(init=False)
+    initial_modules: InitVar[Iterable[Module]]
+    modules: dict[str, Module] = field(init=False)
     pulses_queue: deque[Pulse] = field(init=False, default_factory=deque)
     total_high_pulses: int = field(init=False, default=0)
     total_low_pulses: int = field(init=False, default=0)
 
     def __post_init__(self, modules: Iterable[Module]) -> None:
-        self._modules = {mod.name: mod for mod in modules}
-        assert Broadcaster.NAME in self._modules
+        self.modules = {mod.name: mod for mod in modules}
+        assert Broadcaster.NAME in self.modules
         self._register_conjunction_inputs()
 
     def _register_conjunction_inputs(self) -> None:
         end_modules: list[EndModule] = []
-        for module in self._modules.values():
+        for module in self.modules.values():
             for dest_module_name in module.destination_modules:
-                dest_module = self._modules.get(dest_module_name)
+                dest_module = self.modules.get(dest_module_name)
                 if dest_module is None:
-                    print(
-                        f"Module with name '{dest_module_name}'"
-                        " doesn't exist, creating EndModule...",
-                        file=sys.stderr,
+                    logging.debug(
+                        "Module with name '%s' doesn't exist, creating %s.",
+                        dest_module_name,
+                        EndModule.__name__,
                     )
                     end_modules.append(EndModule(dest_module_name))
                 if not isinstance(dest_module, Conjunction):
                     continue
                 dest_module.register_input(module)
         for end_module in end_modules:
-            self._modules[end_module.name] = end_module
+            self.modules[end_module.name] = end_module
 
     def print_modules(self):
-        for module in self._modules.values():
+        for module in self.modules.values():
             print(module)
 
     def print_modules_state(self):
-        for module in self._modules.values():
+        for module in self.modules.values():
             print(module.state_str())
 
     def _count_pulse(self, pulse: Pulse):
@@ -174,18 +192,24 @@ class ModuleComunicator:
         else:
             self.total_high_pulses += 1
 
-    def push_button(self, n: int = 1):
-        for _ in range(n):
-            initial_pulse = Pulse(Bit.OFF, "button", Broadcaster.NAME)
-            self.pulses_queue.append(initial_pulse)
+    def _default_callback(self, _):
+        return
 
-            while self.pulses_queue:
-                pulse = self.pulses_queue.popleft()
-                self._count_pulse(pulse)
-                dest_module = self._modules[pulse.destination]
-                dest_module.receive_pulse(pulse)
-                next_pulses = dest_module.send_pulse()
-                self.pulses_queue.extend(next_pulses)
+    def push_button(self, callback: Callable[[Pulse], None] | None = None):
+        if callback is None:
+            callback = self._default_callback
+
+        initial_pulse = Pulse(Bit.OFF, "button", Broadcaster.NAME)
+        self.pulses_queue.append(initial_pulse)
+
+        while self.pulses_queue:
+            pulse = self.pulses_queue.popleft()
+            callback(pulse)
+            self._count_pulse(pulse)
+            dest_module = self.modules[pulse.destination]
+            dest_module.receive_pulse(pulse)
+            next_pulses = dest_module.send_pulse()
+            self.pulses_queue.extend(next_pulses)
 
 
 def parse_input(input: YieldStr) -> list[Module]:
@@ -208,13 +232,43 @@ def parse_input(input: YieldStr) -> list[Module]:
 def solution_part_1(input: YieldStr) -> int:
     modules = parse_input(input)
     modcom = ModuleComunicator(modules)
-    modcom.push_button(n=1000)
+    for _ in range(1000):
+        modcom.push_button()
     return modcom.total_high_pulses * modcom.total_low_pulses
 
 
+# This solution is dependent of the input
+# Find the single module that outputs to 'rx' (Should be a conjuction module)
+# and check how many button presses takes to all its inputs to deliver a
+# high pulse to the conjuction. Multiply the number of presses for all the module
+# to get the answer
 def solution_part_2(input: YieldStr) -> int:
-    return 0
+    modules = parse_input(input)
+    module_comunicator = ModuleComunicator(modules)
+
+    output_to_rx = None
+    for module in modules:
+        if "rx" in module.destination_modules:
+            output_to_rx = module
+            break
+    assert isinstance(output_to_rx, Conjunction)
+    logging.debug(output_to_rx)
+
+    input_modules: dict[str, int] = {}
+
+    def callback(pulse: Pulse):
+        nonlocal input_modules
+        if pulse.destination == output_to_rx.name and pulse.bit is Bit.ON:
+            logging.debug(pulse)
+            input_modules.setdefault(pulse.sender, number_presses)
+
+    for number_presses in range(1, 20_001):
+        logging.debug("Press number %s", number_presses)
+        module_comunicator.push_button(callback)
+        if len(input_modules) == len(output_to_rx.input_modules):
+            break
+    return reduce(lambda acc, v: acc * v, input_modules.values())
 
 
 if __name__ == "__main__":
-    run_challenge(solution_part_1, __file__, debug=True)
+    run_challenge(solution_part_2, __file__, debug=True)
