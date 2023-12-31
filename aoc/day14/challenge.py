@@ -1,53 +1,94 @@
 from collections import Counter
-from typing import Iterator, TypeAlias
+from typing import Literal, Sequence, TypeAlias
 
 import utils.iterutils as itu
 from aoc.tools import YieldStr, run_challenge
-from utils import matrix
+from utils.matrix import transpose
 
-PLATFORM_OBJS = {".": 1, "O": 0, "#": 9}
-
-
-Platform: TypeAlias = list[list[int]]
+Platform: TypeAlias = Sequence[Sequence[str]]
+TiltDirection: TypeAlias = Literal["n", "w", "s", "e"]
 
 
-def parse_input(input: YieldStr) -> Platform:
-    platform = []
+def parse_input(input: YieldStr) -> list[tuple[str, ...]]:
+    platform: list[tuple[str, ...]] = []
     for line in input:
-        platform.append([PLATFORM_OBJS[char] for char in line])
+        platform.append(tuple(line))
     return platform
 
 
-def itilt_platform_north(platform: Platform) -> Iterator[tuple[int, ...]]:
-    tilted_platform = []
-    cube_rock = PLATFORM_OBJS["#"]
+def tilt_platform(platform: Platform, direction: TiltDirection) -> list[tuple[str, ...]]:
+    transformed = False
+    if direction == "n":
+        reverse = True
+        platform = transpose(platform)
+        transformed = True
+    elif direction == "s":
+        reverse = False
+        platform = transpose(platform)
+        transformed = True
+    elif direction == "w":
+        reverse = True
+    elif direction == "e":
+        reverse = False
+    else:
+        raise ValueError("direction should be one of 'nsew'")
 
-    for column in matrix.itranspose(platform):
-        sub_sequences = itu.divide_by(cube_rock, column)
-        sub_sequences = (sorted(sub) for sub in sub_sequences)
+    tilted_platform: list[tuple[str, ...]] = []
+    cube_rock = "#"
+
+    for line in platform:
+        sub_sequences = itu.divide_by(cube_rock, line)
+        sub_sequences = (sorted(sub, reverse=reverse) for sub in sub_sequences)
         tilted_column = itu.join_from_iter(sub_sequences, value=cube_rock)
-        tilted_platform.append(tilted_column)
+        tilted_platform.append(tuple(tilted_column))
 
-    return matrix.itranspose(tilted_platform)
+    if transformed:
+        return transpose(tilted_platform)
+    return tilted_platform
+
+
+def spin_cycle(platform: Platform) -> list[tuple[str, ...]]:
+    return tilt_platform(tilt_platform(tilt_platform(tilt_platform(platform, "n"), "w"), "s"), "e")
+
+
+def calculate_load(platform: Platform) -> int:
+    num_rows = len(platform)
+    round_rock = "O"
+    total_load = 0
+    for i, row in enumerate(platform):
+        rounded_rocks = Counter(row).get(round_rock, 0)
+        total_load += rounded_rocks * (num_rows - i)
+    return total_load
 
 
 def solution_part_1(input: YieldStr) -> int:
     platform = parse_input(input)
-    num_rows = len(platform)
-    round_rock = PLATFORM_OBJS["O"]
-
-    total_load = 0
-
-    for i, row in enumerate(itilt_platform_north(platform)):
-        rounded_rocks = Counter(row).get(round_rock, 0)
-        total_load += rounded_rocks * (num_rows - i)
-
-    return total_load
+    return calculate_load(tilt_platform(platform, "n"))
 
 
 def solution_part_2(input: YieldStr) -> int:
-    return 0
+    platform = parse_input(input)
+    seen_states = {tuple(platform): 0}
+    num_spins = 0
+
+    while True:
+        platform = spin_cycle(platform)
+        num_spins += 1
+        freezed_platform = tuple(platform)
+        if freezed_platform in seen_states:
+            break
+        seen_states[freezed_platform] = num_spins
+
+    total_spins = 1_000_000_000
+    cycle_start = seen_states[freezed_platform]
+    period = num_spins - cycle_start
+    remaining_spins = (total_spins - cycle_start) % period
+
+    for _ in range(remaining_spins):
+        platform = spin_cycle(platform)
+
+    return calculate_load(platform)
 
 
 if __name__ == "__main__":
-    run_challenge(solution_part_1, __file__, debug=True)
+    run_challenge(solution_part_2, __file__, debug=True)
