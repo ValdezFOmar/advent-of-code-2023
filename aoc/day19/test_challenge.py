@@ -1,4 +1,5 @@
 # pylint: disable=W0621
+import operator
 from itertools import takewhile
 
 import pytest
@@ -30,7 +31,7 @@ def test_solution(solution, output):
     "workflow, parts",
     [
         (
-            Workflow("AlwaysAccepts", {"x": Rule("<", 0, "None")}, "A"),
+            Workflow("AlwaysAccepts", [Rule("x", "<", 0, "None")], "A"),
             [
                 ({"x": 2655}, PartValidator.ACCEPTED),
                 ({"s": 44}, PartValidator.ACCEPTED),
@@ -44,7 +45,7 @@ def test_solution(solution, output):
 )
 def test_worlflow(workflow, parts):
     for part, destination in parts:
-        assert workflow.destination(part) == destination
+        assert workflow.part_destination(part) == destination
 
 
 @pytest.mark.parametrize(
@@ -53,10 +54,10 @@ def test_worlflow(workflow, parts):
         (
             Workflow(
                 name="ShouldReject",
-                rules={
-                    "x": Rule(">", 1000, PartValidator.REJECTED),
-                    "m": Rule(">", 0, PartValidator.ACCEPTED),
-                },
+                rules=[
+                    Rule("x", ">", 1000, PartValidator.REJECTED),
+                    Rule("m", ">", 0, PartValidator.ACCEPTED),
+                ],
                 default_dest=PartValidator.ACCEPTED,
             ),
             [
@@ -72,7 +73,7 @@ def test_worlflow(workflow, parts):
 )
 def test_reject_parts(workflow, parts):
     for part in parts:
-        assert workflow.destination(part) == PartValidator.REJECTED
+        assert workflow.part_destination(part) == PartValidator.REJECTED
 
 
 @pytest.mark.parametrize(
@@ -91,3 +92,38 @@ def test_workflows_destinations(part_validator, part, xdestinations):
     destinations = part_validator.destinations(part)
     for dest, expected_dest in zip(destinations, xdestinations):
         assert dest == expected_dest
+
+
+def test_edge_case():
+    line = "vvr{a>520:jq,s<3691:R,a>325:A,R}"
+    workflow = Workflow.from_line(line)
+    print(repr(workflow))
+
+    match workflow:
+        case Workflow(
+            name="vvr",
+            rules=[
+                Rule(
+                    category="a",
+                    operation=operator.gt,
+                    value=520,
+                    destination="jq",
+                ),
+                Rule(
+                    category="s",
+                    operation=operator.lt,
+                    value=3691,
+                    destination="R",
+                ),
+                Rule(
+                    category="a",
+                    operation=operator.gt,
+                    value=325,
+                    destination="A",
+                ),
+            ],
+            default_dest="R",
+        ):
+            pass
+        case _:
+            assert False, "Workflow wasn't parsed correctly"

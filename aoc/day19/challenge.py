@@ -12,31 +12,37 @@ Part: TypeAlias = dict[str, int]
 
 @dataclass(slots=True)
 class Rule:
-    op_str: InitVar[str]
+    category: str
+    op_str: str
     value: int
     destination: str
     operation: Callable[[int, int], bool] = field(init=False)
 
     _rules_types = {">": operator.gt, "<": operator.lt}
 
-    def __post_init__(self, op_str) -> None:
-        self.operation = self._rules_types[op_str]
+    def __post_init__(self) -> None:
+        self.operation = self._rules_types[self.op_str]
 
-    def valid(self, x: int, /) -> bool:
-        return self.operation(x, self.value)
+    def valid(self, value: int) -> bool:
+        return self.operation(value, self.value)
+
+    def __str__(self) -> str:
+        return f"{self.category}{self.op_str}{self.value}:{self.destination}"
 
 
+# Parts can contain more than one Rule for any part category and the order matters.
+# Rules are stored in list for this reason, instead of a dictionary.
 @dataclass(slots=True)
 class Workflow:
     name: str
-    rules: dict[str, Rule]
+    rules: list[Rule]
     default_dest: str
 
     _workflow_regex = re.compile(r"(?P<name>\w+){(?P<rules>.+)}")
 
-    def destination(self, part: Part) -> str:
-        for category, rule in self.rules.items():
-            value = part.get(category)
+    def part_destination(self, part: Part) -> str:
+        for rule in self.rules:
+            value = part.get(rule.category)
             if value is None:
                 continue
             if rule.valid(value):
@@ -50,16 +56,21 @@ class Workflow:
         raw_rules = match.group("rules").split(",")
         defualt_rule = raw_rules.pop()
 
-        rules: dict[str, Rule] = {}
+        rules: list[Rule] = []
         for rule in raw_rules:
             cond, dest = rule.split(":")
             category = cond[0]
             operation = cond[1]
             value = int(cond[2:])
-            rules[category] = Rule(operation, value, dest)
+            rules.append(Rule(category, operation, value, dest))
 
         name = match.group("name")
         return cls(name, rules, defualt_rule)
+
+    def __str__(self) -> str:
+        rules = ",".join(str(rule) for rule in self.rules)
+        rules += f",{self.default_dest}"
+        return f"{self.name}{{{rules}}}"
 
 
 @dataclass
@@ -85,7 +96,7 @@ class PartValidator:
             if destination in (self.ACCEPTED, self.REJECTED):
                 return
             workflow = self._workflows[destination]
-            destination = workflow.destination(part)
+            destination = workflow.part_destination(part)
 
 
 def parse_part(string: str) -> Part:
@@ -94,7 +105,6 @@ def parse_part(string: str) -> Part:
     return eval(string)  # pylint: disable=W0123
 
 
-# Answer is 'too' low, so some parts are no being evaluated correctly
 def solution_part_1(input: YieldStr) -> int:
     workflows = (Workflow.from_line(line) for line in takewhile(bool, input))
     pv = PartValidator(workflows)
