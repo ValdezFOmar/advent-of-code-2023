@@ -1,8 +1,8 @@
 """Utilities for iterating and working with iterables / sequences."""
 
-
 import enum
 import itertools
+import operator
 import re
 from functools import reduce
 from typing import Iterable, Iterator, Sequence, TypeVar
@@ -19,6 +19,11 @@ class _Empty(enum.Enum):
 
 
 _empty = _Empty.TOKEN
+
+
+def mul(iterable: Iterable[int]) -> int:
+    """Like `sum()` but multiply instead of adding."""
+    return reduce(operator.mul, iterable)
 
 
 def last_item(iterator: Iterator[T]) -> T:
@@ -58,7 +63,7 @@ def join_from_iter(iterable: Iterable[Iterable[T]], value: T) -> Iterator[T]:
             yield item
 
 
-def get_index(seq: Sequence[T], value: T) -> int | None:
+def get_index(seq: Sequence[object], value: object) -> int | None:
     try:
         return seq.index(value)
     except ValueError:

@@ -20,7 +20,7 @@ def part_validator():
     "solution, output",
     [
         (solution_part_1, 19114),
-        (solution_part_2, 0),
+        (solution_part_2, 167409079868000),
     ],
 )
 def test_solution(solution, output):
@@ -97,7 +97,6 @@ def test_workflows_destinations(part_validator, part, xdestinations):
 def test_edge_case():
     line = "vvr{a>520:jq,s<3691:R,a>325:A,R}"
     workflow = Workflow.from_line(line)
-    print(repr(workflow))
 
     match workflow:
         case Workflow(
